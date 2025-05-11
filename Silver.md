@@ -1,5 +1,7 @@
 #meta #lib/silver
 
+${widgets.commandButton("System: Reload")} ${widgets.commandButton("Silver: Upgrade")}
+
 These Silver modules are currently installed:
 ${silver.list()}
 
@@ -27,9 +29,12 @@ command.define {
   name = "Silver: Upgrade",
   run = function()
     silver.downloadModule()
+    editor.reloadConfigAndCommands()
+
     for _, module in ipairs(silver.modules) do
       silver.downloadModule(module)
     end
+    editor.reloadConfigAndCommands()
   end
 }
 ```
@@ -42,7 +47,7 @@ command.define {
 silver = silver or {}
 silver.path = "Library/Silver"
 silver.repo = "lochel/Silver"
-silver.modules = {}
+silver.modules = {"Admonitions", "Conflicts", "Date", "Journal"}
 
 function silver.list()
   local modules = query[[
@@ -51,7 +56,11 @@ function silver.list()
   ]]
   local result = ""
   for _, item in ipairs(modules) do
-    result = result .. "* [[" .. item.name .. "]]\n"
+    if table.includes(item.tags, "lib/silver") then
+      result = result .. "* [[" .. item.name .. "]]\n"
+    else
+      result = result .. "* ?? [[" .. item.name .. "]]\n"
+    end
   end
   return result
 end
